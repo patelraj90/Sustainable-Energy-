@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Cost Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); }
+    input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
+
+  <!-- Top Bar -->
+  <div class="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center font-bold text-sm">C</div>
+      <span class="font-semibold text-sm text-white/80">CloudZero</span>
+    </div>
+    <div class="flex items-center gap-2 text-xs bg-white/10 px-3 py-1.5 rounded-full">
+      <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+      <span class="text-white/60">1 USD = ₹93.17</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-5xl mx-auto px-6 pb-16">
+
+    <!-- Heading -->
+    <div class="text-center mt-6 mb-12">
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">Cloud Cost Calculator</h1>
+      <p class="text-white/40 mt-2 text-sm">Compare AWS · Azure · GCP in Indian Rupees</p>
+    </div>
+
+    <!-- Input Cards -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+
+      <div class="rounded-2xl p-5 bg-slate-800 border border-slate-700">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-lg">💾</span>
+          <span class="text-xs text-slate-400">e.g. 500</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Storage (GB)</p>
+        <input type="number" id="storage" value="500" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white font-semibold text-lg placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" oninput="calc()">
+        <p class="text-[10px] text-slate-500 mt-2 font-mono">Cost = GB × ₹/GB</p>
+      </div>
+
+      <div class="rounded-2xl p-5 bg-slate-800 border border-slate-700">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-lg">⚡</span>
+          <span class="text-xs text-slate-400">e.g. 720</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Compute Hours</p>
+        <input type="number" id="compute" value="720" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white font-semibold text-lg placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" oninput="calc()">
+        <p class="text-[10px] text-slate-500 mt-2 font-mono">Cost = Hours × ₹/hr</p>
+      </div>
+
+      <div class="rounded-2xl p-5 bg-slate-800 border border-slate-700">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-lg">📡</span>
+          <span class="text-xs text-slate-400">e.g. 200</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Data Transfer (GB)</p>
+        <input type="number" id="transfer" value="200" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white font-semibold text-lg placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" oninput="calc()">
+        <p class="text-[10px] text-slate-500 mt-2 font-mono">Cost = GB × ₹/GB</p>
+      </div>
+
+      <div class="rounded-2xl p-5 bg-slate-800 border border-slate-700">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-lg">💰</span>
+          <span class="text-xs text-slate-400">e.g. 10000</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Monthly Budget (₹)</p>
+        <input type="number" id="budget" value="10000" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-white font-semibold text-lg placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" oninput="calc()">
+        <p class="text-[10px] text-slate-500 mt-2 font-mono">Budget vs Actual</p>
+      </div>
+    </div>
+
+    <!-- Result Cards -->
+    <div class="grid sm:grid-cols-3 gap-4 mb-8">
+
+      <div class="rounded-2xl p-6 bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/20 text-center">
+        <p class="text-amber-400 font-bold text-sm mb-3">🟠 AWS</p>
+        <p id="awsCost" class="text-3xl font-extrabold mb-1">₹0</p>
+        <p class="text-white/30 text-xs mb-3">per month</p>
+        <div id="awsStatus" class="text-xs font-medium"></div>
+      </div>
+
+      <div class="rounded-2xl p-6 bg-gradient-to-br from-blue-500/20 to-cyan-500/10 border border-blue-500/20 text-center">
+        <p class="text-blue-400 font-bold text-sm mb-3">🔵 Azure</p>
+        <p id="azureCost" class="text-3xl font-extrabold mb-1">₹0</p>
+        <p class="text-white/30 text-xs mb-3">per month</p>
+        <div id="azureStatus" class="text-xs font-medium"></div>
+      </div>
+
+      <div class="rounded-2xl p-6 bg-gradient-to-br from-red-500/20 to-pink-500/10 border border-red-500/20 text-center">
+        <p class="text-red-400 font-bold text-sm mb-3">🔴 GCP</p>
+        <p id="gcpCost" class="text-3xl font-extrabold mb-1">₹0</p>
+        <p class="text-white/30 text-xs mb-3">per month</p>
+        <div id="gcpStatus" class="text-xs font-medium"></div>
+      </div>
+    </div>
+
+    <!-- Best Pick -->
+    <div id="bestPick" class="hidden rounded-2xl p-5 bg-gradient-to-r from-green-500/15 to-emerald-500/10 border border-green-500/20 text-center mb-10">
+      <span class="inline-block bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full mb-2">BEST VALUE</span>
+      <p id="bestText" class="text-green-300 text-sm font-medium"></p>
+    </div>
+
+    <!-- Pricing Reference -->
+    <div class="mb-10">
+      <p class="text-white/30 text-xs font-medium uppercase tracking-wider mb-4">Real Pricing Reference (USD → ₹)</p>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+          <p class="text-amber-400 font-semibold text-sm mb-3">AWS</p>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between text-white/50"><span>Storage</span><span class="text-white/80 font-mono">₹2.33/GB</span></div>
+            <div class="flex justify-between text-white/50"><span>Compute</span><span class="text-white/80 font-mono">₹8.94/hr</span></div>
+            <div class="flex justify-between text-white/50"><span>Transfer</span><span class="text-white/80 font-mono">₹8.39/GB</span></div>
+          </div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+          <p class="text-blue-400 font-semibold text-sm mb-3">Azure</p>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between text-white/50"><span>Storage</span><span class="text-white/80 font-mono">₹2.05/GB</span></div>
+            <div class="flex justify-between text-white/50"><span>Compute</span><span class="text-white/80 font-mono">₹7.92/hr</span></div>
+            <div class="flex justify-between text-white/50"><span>Transfer</span><span class="text-white/80 font-mono">₹8.11/GB</span></div>
+          </div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+          <p class="text-red-400 font-semibold text-sm mb-3">GCP</p>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between text-white/50"><span>Storage</span><span class="text-white/80 font-mono">₹1.86/GB</span></div>
+            <div class="flex justify-between text-white/50"><span>Compute</span><span class="text-white/80 font-mono">₹4.47/hr</span></div>
+            <div class="flex justify-between text-white/50"><span>Transfer</span><span class="text-white/80 font-mono">₹7.45/GB</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="mb-10">
+      <p class="text-white/30 text-xs font-medium uppercase tracking-wider mb-4">Quick Comparison</p>
+      <div class="bg-white/5 rounded-xl border border-white/5 overflow-hidden">
+        <table class="w-full text-xs">
+          <tr class="border-b border-white/5">
+            <td class="p-3 text-white/40"></td>
+            <td class="p-3 text-amber-400 font-semibold text-right">AWS</td>
+            <td class="p-3 text-blue-400 font-semibold text-right">Azure</td>
+            <td class="p-3 text-red-400 font-semibold text-right">GCP</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-3 text-white/50">Free Tier</td>
+            <td class="p-3 text-right text-white/60">12 months</td>
+            <td class="p-3 text-right text-white/60">12 months</td>
+            <td class="p-3 text-right text-white/60">Always free</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-3 text-white/50">Scalability</td>
+            <td class="p-3 text-right">⭐⭐⭐⭐⭐</td>
+            <td class="p-3 text-right">⭐⭐⭐⭐</td>
+            <td class="p-3 text-right">⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-3 text-white/50">Performance</td>
+            <td class="p-3 text-right">⭐⭐⭐⭐⭐</td>
+            <td class="p-3 text-right">⭐⭐⭐⭐</td>
+            <td class="p-3 text-right">⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td class="p-3 text-white/50 font-semibold">Your Total</td>
+            <td class="p-3 text-right font-mono font-bold text-amber-300" id="tAws">-</td>
+            <td class="p-3 text-right font-mono font-bold text-blue-300" id="tAzure">-</td>
+            <td class="p-3 text-right font-mono font-bold text-red-300" id="tGcp">-</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI Tokens Section -->
+    <div class="mb-10">
+      <p class="text-white/30 text-xs font-medium uppercase tracking-wider mb-4">Sustainable Tokens for AI</p>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="bg-white/5 rounded-xl p-5 border border-white/5">
+          <p class="text-sm font-semibold mb-3">⚡ Energy Problem</p>
+          <div class="space-y-2 text-xs text-white/40">
+            <p>GPT-3 training: ~1,287 MWh</p>
+            <p>Global AI energy: ~340 TWh/year</p>
+            <p>Single inference: ~0.002 kWh</p>
+          </div>
+        </div>
+        <div class="bg-white/5 rounded-xl p-5 border border-white/5">
+          <p class="text-sm font-semibold mb-3">💡 Solutions</p>
+          <div class="space-y-2 text-xs text-white/40">
+            <p>Efficient models (DistilGPT, TinyLLM)</p>
+            <p>Token optimization & pruning</p>
+            <p>Quantization (FP16 → INT8)</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+        <div class="bg-blue-500/10 rounded-xl p-3 text-center border border-blue-500/10">
+          <p class="text-xl font-bold text-blue-400">37%</p>
+          <p class="text-[10px] text-white/30">Energy Saved</p>
+        </div>
+        <div class="bg-green-500/10 rounded-xl p-3 text-center border border-green-500/10">
+          <p class="text-xl font-bold text-green-400">2.4x</p>
+          <p class="text-[10px] text-white/30">Faster</p>
+        </div>
+        <div class="bg-purple-500/10 rounded-xl p-3 text-center border border-purple-500/10">
+          <p class="text-xl font-bold text-purple-400">50%</p>
+          <p class="text-[10px] text-white/30">Tokens Reduced</p>
+        </div>
+        <div class="bg-amber-500/10 rounded-xl p-3 text-center border border-amber-500/10">
+          <p class="text-xl font-bold text-amber-400">₹1.2L</p>
+          <p class="text-[10px] text-white/30">Saved/Month</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="text-center pb-8 text-white/20 text-xs">
+    CloudZero · College Project · Prices based on official cloud provider rates
+  </div>
+
+  <script>
+    const p = {
+      aws:   { s: 2.33, c: 8.94, t: 8.39 },
+      azure: { s: 2.05, c: 7.92, t: 8.11 },
+      gcp:   { s: 1.86, c: 4.47, t: 7.45 }
+    };
+
+    function f(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+
+    function calc() {
+      const s = parseFloat(document.getElementById('storage').value) || 0;
+      const c = parseFloat(document.getElementById('compute').value) || 0;
+      const t = parseFloat(document.getElementById('transfer').value) || 0;
+      const b = parseFloat(document.getElementById('budget').value) || 0;
+
+      let low = Infinity, best = '';
+
+      for (const [n, r] of Object.entries(p)) {
+        const total = s * r.s + c * r.c + t * r.t;
+        if (total < low) { low = total; best = n; }
+
+        document.getElementById(n + 'Cost').textContent = f(total);
+
+        const el = document.getElementById(n + 'Status');
+        if (b > 0) {
+          if (total <= b) {
+            el.innerHTML = '<span class="text-green-400">✅ Under by ' + f(b - total) + '</span>';
+          } else {
+            el.innerHTML = '<span class="text-red-400">❌ Over by ' + f(total - b) + '</span>';
+          }
+        } else {
+          el.innerHTML = '';
+        }
+
+        const tid = n === 'aws' ? 'tAws' : n === 'azure' ? 'tAzure' : 'tGcp';
+        document.getElementById(tid).textContent = f(total);
+      }
+
+      const pick = document.getElementById('bestPick');
+      const txt = document.getElementById('bestText');
+      if (b > 0) {
+        pick.classList.remove('hidden');
+        const names = { aws: 'AWS', azure: 'Azure', gcp: 'GCP' };
+        if (low <= b) {
+          txt.textContent = names[best] + ' is cheapest at ' + f(low) + '/mo — saves ' + f(b - low) + ' from your budget!';
+        } else {
+          txt.textContent = 'All exceed budget. ' + names[best] + ' is still lowest at ' + f(low) + '/mo.';
+        }
+      } else {
+        pick.classList.add('hidden');
+      }
+    }
+
+    calc();
+  </script>
+</body>
+</html>
